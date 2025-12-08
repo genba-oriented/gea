@@ -1,0 +1,119 @@
+= Good Enough Architecture ~ API
+:imagesdir: ./images
+
+== 実行方法
+
+=== Postgresの起動とテーブルの用意
+....
+docker run --name postgres-fleamarket -p 5432:5432 -e POSTGRES_USER=fleamarket -e POSTGRES_PASSWORD=fleamarket -e POSTGRES_DB=fleamarket -d postgres
+
+docker exec -it postgres-fleamarket psql -U fleamarket
+
+# psqlの画面に、src/test/resouces/schema.sql の中身を貼り付けて実行
+
+....
+
+=== アプリケーションのビルド
+
+....
+# Java21以上が必要です
+./mvnw package
+....
+
+
+=== 環境変数の設定
+Javaを実行する前に、以下の環境変数を設定します。
+
+|===
+|環境変数名|説明|サンプル値
+
+|SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI|JWTを発行するIdP(Issuer)のURL|\http://localhost:18080/realms/master
+|===
+
+.Windows
+....
+set SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://localhost:18080/realms/master
+....
+
+.Mac, Linux
+....
+export SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://localhost:18080/realms/master
+....
+
+
+=== Javaの実行
+....
+java -jar target/fleamarket-api-0.0.1-SNAPSHOT.jar
+....
+
+
+== アーキテクチャ
+
+=== ソフトウェアアーキテクチャ
+
+image::sw-architecture.drawio.svg[]
+
+|===
+|役割名|説明
+
+|Controller|リクエストを受け付けて、レスポンスを返す
+|Service|業務ロジックを行う
+|Repository|データアクセスを行う
+|Entity|業務的なデータを保持。基本的にテーブルと1対1でクラスを作成する
+|Input|クライアントからの入力データを保持する
+|Dto|都合の良い単位でデータを保持する。主に、クライアントに返すデータとしてEntityが適さない場合に作成する。※Dtoは、Data Transfer Objectの略
+|===
+
+=== ドメイン間の依存関係
+ドメイン間の依存関係を一方通行にすることで、プログラムの複雑化を防ぎます。
+
+image::domain-dependencies.drawio.svg[]
+
+
+なお、ドメイン間の依存関係の違反をチェックするため、 https://www.archunit.org[ArchUnit^] を使用しています。
+
+
+=== パッケージ構造について
+各ドメインのパッケージの下に、役割ごとのパッケージを配置しています。以下のようなイメージです。
+----
+ドメインA
+├── controller
+├── service
+├── entity
+...
+ドメインB
+├── controller
+├── service
+├── entity
+...
+----
+
+
+== 技術スタック
+
+|===
+|ライブラリ名|説明
+
+|https://spring.io/projects/spring-boot[Spring Boot^]|アプリケーション全体のフレームワーク。Spring Framework, Spring MVC, Spring Securityを含む
+|https://github.com/domaframework/doma[Doma^]|データアクセスのためのライブラリ
+|===
+
+
+== 認証について
+OIDCのトークン(JWT)をリクエストで受け取って妥当性を検証し、ユーザを特定しています。
+
+
+== テストについて
+
+=== テスト用のデータベース
+https://testcontainers.com[Testcontainers^]を使用してデータベースを用意しています。
+
+
+=== アーキテクチャのテスト
+ドメイン間の依存の方向や、役割間の依存の方向に違反していないかを、 https://www.archunit.org[ArchUnit^]を使ってチェックしています。
+
+
+== API仕様書について
+API仕様書が、src/main/asciidoc/index.html に格納されています。https://htmlpreview.github.io/?https://github.com/genba-oriented/gea/api/blob/main/src/main/asciidoc/index.html[こちら]で見栄え良く表示できます。この仕様書は、 https://spring.io/projects/spring-restdocs[Spring REST Docs^]を使用して、テストプログラムから自動的に仕様書の断片を生成しています。生成された断片を、src/main/asciidoc/rest-api ディレクトリ配下のadocファイルが取り込んでいます。adocファイルからhtmlファイルへの変換はIntelliJ IDEAで行っています。
+
+

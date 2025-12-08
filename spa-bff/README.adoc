@@ -1,0 +1,177 @@
+= Good Enough Architecture ~ SPA BFF
+:imagesdir: ./images
+
+
+== インストール＆実行方法
+=== パッケージのインストール
+....
+npm install
+....
+
+=== 環境変数用のファイルを用意
+OIDCを用いたログインのための設定値などを環境変数で用意します。「.evn」ファイルで環境変数を指定できます。「.env.example」をコピーして「.env」ファイルを作成し、以下の項目を設定します。link:../keycloak/README.adoc[設定済みのKeycloak]を使用する場合はそのまま利用できます。
+
+|===
+|環境変数名|説明|サンプル値
+
+|OIDC_ISSUER_URL|OIDCのIdpのURL。本リポジトリは、IdpのプロバイダとしてGoogleで動作確認しています。他のプロバイダでもある程度動作すると思いますが、ソースコードの微修正が必要になるかもしれません。|\http://localhost:18080/realms/master
+|OIDC_CLIENT_ID|OIDCのクライントID|gea-bff
+|OIDC_CLIENT_SECRET|OIDCのクライントシークレット|-
+|OIDC_REDIRECT_URL|OIDCのリダイレクトURL。本リポジトリは「/callback」というエンドポイントを使用する想定になっています。|\http://localhost:3000/callback
+|SESSION_PASSWORD|BFFが保持するセッションデータは、暗号化してブラウザのクッキーで保持しています。本環境変数で暗号時のパスワードを設定します。パスワードの値は最低32桁必要です。|12345678901234567890123456789012
+|API_BASE_URL|APIのURL。スタブを有効にして起動する場合は本環境変数の指定は不要です。|\http://localhost:8080
+|API_STUB|APIのスタブを有効・無効にするためのフラグ|true
+|===
+
+=== ローカル(dev server)で実行
+....
+npm run dev
+....
+
+=== ブラウザでアクセス
+「 http://localhost:3000[http://localhost:3000^] 」にアクセスします。スタブのAPIを使用している場合、表示されるデータは固定です。
+
+
+=== ビルドして実行
+....
+npm run build
+npx tsx --env-file=.env src-server/server.ts
+....
+
+
+
+== システムアーキテクチャ
+
+image::architecture.drawio.svg[]
+
+|===
+|役割名|説明
+
+|SPA|ブラウザ上で動作するJavaScriptアプリケーション
+|Webサーバ兼BFF|SPAのプログラムを配信しつつ、BFFの役割を担うサーバ
+|APIサーバ|APIサーバ
+|IdP|Identity Provider
+|===
+
+
+== (SPAの)ソフトウェアアーキテクチャ
+
+image::sw-architecture.drawio.svg[]
+
+
+|===
+|役割名|説明
+
+|Page|画面を表す(「出品登録画面」「出品詳細画面」など)。React Routerでルーティングする単位となる
+|Component|Page内で描画する画面のコンポーネント
+|Model|データの保持と、描画以外の処理に特化したクラス。基本的にMobXを使ってデータを公開し、そのデータをPageやComponentが描画で使用する。
+|Dto|バックエンドAPIから取得するデータを表すクラス
+|Util|ユーティリティ
+|===
+
+
+== 技術スタック
+
+=== UI周り
+|===
+|https://react.dev[React^]|UIのレンダリングをするライブラリとして、現在主流となっている
+|https://mui.com[Material UI^]|UIコンポーネントライブラリとしてシェアが高い
+|https://reactrouter.com[React Router^]|画面をルーティングする知名度の高いライブラリ。バージョン7からは、SSRの機能をもつRemixというライブラリと融合したが、本リポジトリではSSRの機能は使っていない。
+|===
+
+
+=== ステート管理
+|===
+|https://mobx.js.org[MobX^]| 主流というわけではなが、昔から存在するステート管理のライブラリ。オブジェクトのプロパティを更新しただけで自動的に再描画(render関数の呼び出し)してくれる。
+|===
+
+=== BFF周り
+|===
+|https://expressjs.com[Express^]|サーバーサイドのWebフレームワーク
+|https://github.com/auth0/express-openid-connect[express-openid-connect^]|OpenID ConnectのClientを作成するための機能を提供するライブラリ。特定のIdpに依存しない。IDaaSとして有名なAuth0が開発している。
+|===
+
+[NOTE]
+====
+トークンなどのセッションデータをBFFが管理する必要がありますが、express-openid-connectはデフォルトでセッションデータをCookieに保管するため、Key-Valueストアなどのストレージを用意する必要はありません。なお、多くのブラウザは1つのCookieのサイズの上限が4096バイトですが、express-openid-connectはCookieのサイズが大きくなると自動的に複数のCookieに分割し、上限オーバーを回避してくれます。
+====
+
+
+=== ビルドツール
+|===
+|https://rsbuild.dev[Rsbuild^]|処理速度が速いとされるビルドツール
+|===
+
+
+== ディレクトリ構成
+
+=== トップレベル
+
+|===
+|ディレクトリ名|説明
+
+|doc|ドキュメント
+|src|SPAのソースコード
+|src-server|BFFのソースコード
+|===
+
+=== src内(SPAのソースコード)のディレクトリ構成
+
+|===
+|ディレクトリ名|説明
+
+|components|Componentを格納
+|dto|Dtoを格納
+|model|Modelを格納
+|pages|Pageを格納
+|util|Utilを格納
+|===
+
+
+## テストについて
+
+### テスティングフレームワーク
+テスティングフレームワークとして、 https://vitest.dev[Vitest^]を使用します。
+
+### Express周りのサーバサイドのテスト
+https://github.com/ladjs/supertest[SuperTest^]を用いてリクエストを送信しながらテストします。
+
+NOTE: SuperTestは、ランダムなポートを使ってサーバプログラムを自動的に起動し、テストできるライブラリです。
+
+### UIコンポーネントのテスト
+https://github.com/testing-library/react-testing-library[React Testing Library^]を使用します。APIサーバは、 https://mswjs.io[Mock Service Worker (MSW)^]を使用してモック化します。
+
+NOTE: MSWは、APIをモック化できるライブラリです。
+
+Modelや関数をモック化する場合は、Vitestの https://vitest.dev/guide/mocking.html[vi^]でモック化します。
+
+### Modelのテスト
+APIを呼び出している場合は、MSWを使用してAPIをモック化します。
+
+
+== 備忘録
+
+=== Modelについて
+特にこの単位で作るといったルールはありません。以下のようなケースで作成します。
+
+* PageやComponentで、useStateで管理するデータが多くなった場合
+* PageやComponentで、描画以外の処理が複雑になった場合
+* 複数のPageやComponentで、複数のデータや処理を共有したい場合
+
+=== MobXの利用シーン
+基本的に、Modelを作った際にMobXを使用します。MobXを使ってModelのデータを公開すれば、useStateを使わなくても、データ更新時に自動的に再描画(renderメソッドの呼び出し)が行われます。
+
+=== (Reactの)Contextの利用シーン
+UIコンポーネント間でデータを受け渡す場合は、基本的にはPropsを使用します。しかし、Propsの受け渡しが煩雑になったり、親子関係に関わらず様々なUIコンポーネントで共通して使用するデータだったりする場合は、Contextを使用したほうがよいです。
+また、Page間でデータを共有する場合は、共通のLayoutを作成し、React Routerが提供する https://reactrouter.com/6.30.0/hooks/use-outlet-context#useoutletcontext[useOutletContext^]を使用すると便利です。
+
+=== OIDCのClientの役割をどこで担うか
+OIDCのClientの役割は、SPAで担った方が、サーバサイドでトークンの管理をしなくてよいのでシンプルだと個人的には思います。しかし、以下のようなデメリットがあります。
+
+* 基本的に各Idpが提供するライブラリを使用するため、各Idpに依存した作りになってしまう(Idpに依存しないライブラリを使うこともできるが、Idpが提供するものに比べると敷居が高くなる)
+* Authorization CodeフローでClientシークレットの指定を必須とするIdpに対応できない(ClientシークレットをSPAのプログラム内で保持するとセキュリティ的に問題なため)。例えばGoogleの場合、調べた限りだと https://developers.google.com/identity/openid-connect/openid-connect#exchangecode[Clientシークレットの指定が必須^]となっています
+* トークンをブラウザで保持するため、漏洩のリスクが上がる
+
+本リポジトリでは、上記のデメリットを回避するため、BFFがOIDCのClientの役割を担っています。
+
+

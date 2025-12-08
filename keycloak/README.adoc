@@ -1,0 +1,35 @@
+= 動作確認用のKeycloak
+
+サンプルプログラム用のKeycloakの設定です。
+dataフォルダ内に、動作確認用の設定データが格納されています。
+
+1. Keycloakを動かすにはJava17以上のインストールが必要です。また、javaコマンドにPATHを通す必要があります。
+
+1. KeycloakのZIPファイルを以下からダウンロードします。
++
+====
+https://www.keycloak.org/archive/downloads-26.3.3.html
+====
+
+1. ZIPファイルを本フォルダ配下に解凍します。
+
+1. 以下のコマンドを実行すると、dataフォルダ内のデータを読み込んでKeycloakが起動します。
++
+....
+./keycloak-26.3.3/bin/kc.bat start-dev --http-port 18080 --import-realm
+....
++
+2回目以降起動するときは、
++
+....
+./keycloak-26.3.3/bin/kc.bat start-dev --http-port 18080
+....
++
+で起動します。
+
+
+
+
+
+
+
