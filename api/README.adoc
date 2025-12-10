@@ -114,6 +114,10 @@ https://testcontainers.com[Testcontainers^]を使用してデータベースを�
 
 
 == API仕様書について
-API仕様書が、src/main/asciidoc/index.html に格納されています。https://htmlpreview.github.io/?https://github.com/genba-oriented/gea/api/blob/main/src/main/asciidoc/index.html[こちら]で見栄え良く表示できます。この仕様書は、 https://spring.io/projects/spring-restdocs[Spring REST Docs^]を使用して、テストプログラムから自動的に仕様書の断片を生成しています。生成された断片を、src/main/asciidoc/rest-api ディレクトリ配下のadocファイルが取り込んでいます。adocファイルからhtmlファイルへの変換はIntelliJ IDEAで行っています。
+API仕様書が、src/main/asciidoc/index.html に格納されています。
+
+https://htmlpreview.github.io/?https://github.com/genba-oriented/gea/blob/main/api/src/main/asciidoc/index.html
+
+で見栄え良く表示できます。この仕様書は、 https://spring.io/projects/spring-restdocs[Spring REST Docs^]を使用して、テストプログラムから自動的に仕様書の断片を生成しています。生成された断片を、src/main/asciidoc ディレクトリ配下のadocファイルが取り込んでいます。adocファイルからhtmlファイルへの変換はIntelliJ IDEAで行っています。
 
 
