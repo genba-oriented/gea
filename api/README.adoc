@@ -16,7 +16,7 @@ docker exec -it postgres-fleamarket psql -U fleamarket
 === アプリケーションのビルド
 
 ....
-# Java21以上が必要です
+# Java21が必要です。Java25は、テストが失敗するので使用できません
 ./mvnw package
 ....
 
@@ -28,16 +28,19 @@ Javaを実行する前に、以下の環境変数を設定します。
 |環境変数名|説明|サンプル値
 
 |SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI|JWTを発行するIdP(Issuer)のURL|\http://localhost:18080/realms/master
+|SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES|aud JWTのaud Claimの値。ここで指定した値と同じ値になってるかチェックしてくれる|gea-api
 |===
 
 .Windows
 ....
 set SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://localhost:18080/realms/master
+set SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=gea-api
 ....
 
 .Mac, Linux
 ....
 export SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://localhost:18080/realms/master
+export SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=gea-api
 ....
 
 

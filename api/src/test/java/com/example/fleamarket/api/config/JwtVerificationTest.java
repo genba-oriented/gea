@@ -18,8 +18,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 @EnableSecurityTestWithMock
-// 環境変数の「SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES」「SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI」を無効にするための設定
-// mvnでテストするときに、JwtDecoderが上記を取り込んでしまうのを防ぐ
+// mvnでテストするときに、環境変数に「SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES」「SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI」が設定されていると、
+// application-default.ymlの設定が上書きされるため、ここでさらに上書きする
 @TestPropertySource(properties = {
     "spring.security.oauth2.resourceserver.jwt.issuer-uri=",
     "spring.security.oauth2.resourceserver.jwt.audiences=aud01"

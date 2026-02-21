@@ -9,4 +9,9 @@ spring:
         password: fleamarket
         url: jdbc:postgresql://localhost:5432/fleamarket
         username: fleamarket
-
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                  issuer-uri: http://localhost:18080/realms/master
+                  audiences: gea-api

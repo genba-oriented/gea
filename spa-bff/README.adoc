@@ -166,11 +166,11 @@ UIコンポーネント間でデータを受け渡す場合は、基本的には
 また、Page間でデータを共有する場合は、共通のLayoutを作成し、React Routerが提供する https://reactrouter.com/6.30.0/hooks/use-outlet-context#useoutletcontext[useOutletContext^]を使用すると便利です。
 
 === OIDCのClientの役割をどこで担うか
-OIDCのClientの役割は、SPAで担った方が、サーバサイドでトークンの管理をしなくてよいのでシンプルだと個人的には思います。しかし、以下のようなデメリットがあります。
+SPAの場合、OIDCのClientの役割をSPAが担うことができます。その方が、サーバサイドでトークンの管理をしなくてよいのでプログラム的にはシンプルになります。しかし、以下のようなデメリットがあります。
 
-* 基本的に各Idpが提供するライブラリを使用するため、各Idpに依存した作りになってしまう(Idpに依存しないライブラリを使うこともできるが、Idpが提供するものに比べると敷居が高くなる)
-* Authorization CodeフローでClientシークレットの指定を必須とするIdpに対応できない(ClientシークレットをSPAのプログラム内で保持するとセキュリティ的に問題なため)。例えばGoogleの場合、調べた限りだと https://developers.google.com/identity/openid-connect/openid-connect#exchangecode[Clientシークレットの指定が必須^]となっています
-* トークンをブラウザで保持するため、漏洩のリスクが上がる
+* ブラウザ上でトークンを管理するため、漏えいのリスクが上がる
+* 基本的に各Idpが提供するライブラリを使用するため、各Idpに依存した作りになってしまう
+* Authorization CodeフローでClientシークレットの指定を必須とするIdpに対応できない(ClientシークレットをSPAのプログラム内で保持するとセキュリティ的に問題なため)。例えばGoogle Sign-Inの場合、調べた限りだと https://developers.google.com/identity/openid-connect/openid-connect#exchangecode[Clientシークレットの指定が必須^]となっています
 
 本リポジトリでは、上記のデメリットを回避するため、BFFがOIDCのClientの役割を担っています。
 

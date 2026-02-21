@@ -1,0 +1,1 @@
+keycloak-26.3.3/bin/kc.bat export --dir realm-data

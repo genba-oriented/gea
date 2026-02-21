@@ -16,7 +16,7 @@
 		<doma.version>3.8.0</doma.version>
 		<doma-spring.version>2.4.0</doma-spring.version>
         <java-jwt.version>4.5.0</java-jwt.version>
-        <archunit.version>1.4.0</archunit.version>
+        <archunit.version>1.4.1</archunit.version>
 	</properties>
 	<dependencies>
 		<dependency>

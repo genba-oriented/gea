@@ -1,1 +1,0 @@
-./keycloak-26.3.3/bin/kc.bat start-dev --http-port 18080 --import-realm
